@@ -16,9 +16,10 @@ interface UserProfile {
 
 interface UserOnboardingProps {
   onComplete: (profile: UserProfile) => void
+  isEditing: boolean
 }
 
-export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
+const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete, isEditing }) => {
   const [name, setName] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
   const [error, setError] = useState("")
@@ -64,6 +65,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
                 placeholder="Enter your full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={!isEditing}
               />
             </div>
 
@@ -74,6 +76,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
                 placeholder="+1 (555) 123-4567"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
+                disabled={!isEditing}
               />
               <p className="text-xs text-muted-foreground">This will be used as your default number for calls</p>
             </div>
@@ -85,8 +88,8 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">
-              Get Started
+            <Button type="submit" className="w-full" disabled={!isEditing}>
+              Continue
             </Button>
           </CardFooter>
         </form>
@@ -94,4 +97,6 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
     </div>
   )
 }
+
+export default UserOnboarding
 

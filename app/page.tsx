@@ -25,7 +25,7 @@ export default function PhoneCallAgent() {
   const [transcript, setTranscript] = useState<Array<{ speaker: string; text: string }>>([])
   const [isCallActive, setIsCallActive] = useState(false)
   const [summary, setSummary] = useState("")
-const [ws, setWs] = useState<WebSocket | null>(null)
+ const [ws, setWs] = useState<WebSocket | null>(null)
 const [callSid, setCallSid] = useState<string | null>(null);
 
   // User profile state
@@ -33,6 +33,13 @@ const [callSid, setCallSid] = useState<string | null>(null);
   const [isFirstRun, setIsFirstRun] = useState(true)
   const [userPhoneNumber, setUserPhoneNumber] = useState(userProfile?.phoneNumber)
 
+  // Add a new state variable to manage edit mode
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Function to toggle edit mode
+  const toggleEditMode = () => {
+    setIsEditing((prev) => !prev);
+  }
 
   // Check if user has completed onboarding
   useEffect(() => {
@@ -52,6 +59,7 @@ const [callSid, setCallSid] = useState<string | null>(null);
     setUserPhoneNumber(profile.phoneNumber)
     localStorage.setItem("userProfile", JSON.stringify(profile))
     setIsFirstRun(false)
+    setIsEditing(false); // Set isEditing to false after completing onboarding
   }
 
   const validatePrompt = (text: string) => {
@@ -186,8 +194,12 @@ const [callSid, setCallSid] = useState<string | null>(null);
   }
 
   // If this is the first run, show onboarding
-  if (isFirstRun) {
-    return <UserOnboarding onComplete={handleOnboardingComplete} />
+  if (isFirstRun || isEditing) {
+    return (
+      <div>
+        <UserOnboarding onComplete={handleOnboardingComplete} isEditing={isEditing} />
+      </div>
+    );
   }
 
   return (
@@ -197,18 +209,25 @@ const [callSid, setCallSid] = useState<string | null>(null);
       {userProfile && (
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="flex items-center space-x-4">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center space-x-4">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">{userProfile.name}</p>
+                  <p className="text-sm text-muted-foreground">{userPhoneNumber}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium">{userProfile.name}</p>
-                <p className="text-sm text-muted-foreground">{userPhoneNumber}</p>
-              </div>
+              <Button onClick={() => setIsEditing(true)} className="mt-4">
+                Edit 
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
+
+
 
       {!isCallActive && callStatus !== "ended" && callStatus !== "failed" ? (
         <Card>
