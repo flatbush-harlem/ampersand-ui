@@ -31,7 +31,7 @@ const [callSid, setCallSid] = useState<string | null>(null);
   // User profile state
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [isFirstRun, setIsFirstRun] = useState(true)
-  const [userPhoneNumber, setUserPhoneNumber] = useState("")
+  const [userPhoneNumber, setUserPhoneNumber] = useState(userProfile?.phoneNumber)
 
 
   // Check if user has completed onboarding
@@ -203,7 +203,7 @@ const [callSid, setCallSid] = useState<string | null>(null);
               </div>
               <div>
                 <p className="font-medium">{userProfile.name}</p>
-                <p className="text-sm text-muted-foreground">{userProfile.phoneNumber}</p>
+                <p className="text-sm text-muted-foreground">{userPhoneNumber}</p>
               </div>
             </div>
           </CardContent>
