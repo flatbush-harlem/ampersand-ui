@@ -1,5 +1,7 @@
 "use client"
-// TODO: npm audit fix to remove the warnings
+// TODO: Modify the prompt to include the user's name and contact phone number
+// TODO: Add a better system prompt for outbound calls
+
 import { useState, useEffect } from "react"
 import { Phone, PhoneOff, Loader2, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
