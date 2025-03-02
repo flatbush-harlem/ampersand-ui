@@ -18,7 +18,7 @@ interface UserProfile {
 }
 
 export default function PhoneCallAgent() {
-  const [prompt, setPrompt] = useState("")
+  const [prompt, setPrompt] = useState("You are an outbound agent, when you get conneted with the caller and here a voice your job is to execute a task that will be given to you. This task will require you to have a conversation with someone who needs to realize quickly that you are an AI assistant and you need to be brief in your repsonses to give time for the person to abruptly step in. Your task is:")
   const [toPhoneNumber, setToPhoneNumber] = useState("")
   const [callStatus, setCallStatus] = useState<"idle" | "ringing" | "connected" | "ended" | "failed">("idle")
   const [errorMessage, setErrorMessage] = useState("")
