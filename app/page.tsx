@@ -25,6 +25,7 @@ export default function PhoneCallAgent() {
   const [transcript, setTranscript] = useState<Array<{ speaker: string; text: string }>>([])
   const [isCallActive, setIsCallActive] = useState(false)
   const [summary, setSummary] = useState("")
+const [ws, setWs] = useState<WebSocket | null>(null)
 
   // User profile state
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
@@ -60,8 +61,10 @@ export default function PhoneCallAgent() {
     return /^\+?[0-9]{10,15}$/.test(number.replace(/[\s()-]/g, ""))
   }
 
-  const handleStartCall = () => {
+  const handleStartCall = async () => {
     setErrorMessage("")
+    setTranscript([])
+    setSummary("")
 
     // Validate inputs
     if (!validatePrompt(prompt)) {
@@ -77,49 +80,73 @@ export default function PhoneCallAgent() {
     // Simulate call flow
     setCallStatus("ringing")
 
-    // Simulate connection delay
-    setTimeout(() => {
-      setCallStatus("connected")
-      setIsCallActive(true)
-
-      // Create system prompt that includes user information
-      const systemPrompt = userProfile
-        ? `Agent is assisting ${userProfile.name} (phone: ${userProfile.phoneNumber}). Task: ${prompt}`
-        : `Agent is assisting a user. Task: ${prompt}`
-
-      console.log("System prompt:", systemPrompt)
-
-      // Simulate conversation
-      const demoConversation = [
-        {
-          speaker: "Agent",
-          text: `Hello, this is an automated call${userProfile ? ` for ${userProfile.name}` : ""}. I'll help you with your request.`,
-        },
-        { speaker: "User", text: "Hi, yes I'm listening." },
-        { speaker: "Agent", text: `I'm calling about: "${prompt}"` },
-        { speaker: "User", text: "Yes, that works for me." },
-        { speaker: "Agent", text: "Great! Is there anything else you need help with?" },
-        { speaker: "User", text: "No, that's all. Thank you." },
-        { speaker: "Agent", text: `You're welcome${userProfile ? `, ${userProfile.name}` : ""}. Have a great day!` },
-      ]
-
-      // Add transcript messages with delay to simulate real-time conversation
-      demoConversation.forEach((message, index) => {
-        setTimeout(() => {
-          setTranscript((prev) => [...prev, message])
-
-          // End call after last message
-          if (index === demoConversation.length - 1) {
-            setTimeout(() => handleEndCall(true), 1000)
-          }
-        }, index * 2000)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/outbound-call`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          number: phoneNumber,
+          prompt: prompt,
+          first_message: "Hey can you hear me?..." // Customize this as needed
+        })
       })
-    }, 2000)
+
+      const result = await response.json()
+      
+      if (result.success) {
+        console.log("Call initiated:", result.callSid)
+        setCallStatus("connected")
+        setIsCallActive(true)
+
+        // Connect to the WebSocket stream
+        const websocket = new WebSocket(`${process.env.NEXT_PUBLIC_WS_BASE_URL}/transcription-stream/${result.callSid}`)
+      
+      websocket.onopen = () => {
+        console.log("WebSocket connected")
+        setWs(websocket)
+      }
+
+      websocket.onmessage = (event) => {
+        const message = JSON.parse(event.data)
+
+        if (message.event === "transcript") {
+          setTranscript((prev) => [
+            ...prev,
+            { speaker: message.speaker, text: message.text }
+          ])
+        }
+      }
+
+      websocket.onerror = (error) => {
+        console.error("WebSocket error:", error)
+      }
+
+      websocket.onclose = () => {
+        console.log("WebSocket disconnected")
+        setWs(null)
+      }
+
+      } else {
+        setErrorMessage(result.error || "Failed to initiate call.")
+        setCallStatus("failed")
+      }
+    } catch (error) {
+      console.error("Error starting call:", error)
+      setErrorMessage("Failed to connect to the server.")
+      setCallStatus("failed")
+    }
+
+    
   }
 
   const handleEndCall = (success = true) => {
     setCallStatus("ended")
     setIsCallActive(false)
+
+    if (ws) {
+      ws.close()
+      setWs(null)
+    }
 
     if (success) {
       setSummary(`Call completed successfully. The task "${prompt}" was handled.`)
