@@ -1,5 +1,5 @@
 "use client"
-
+// TODO: npm audit fix to remove the warnings
 import { useState, useEffect } from "react"
 import { Phone, PhoneOff, Loader2, User } from "lucide-react"
 import { Button } from "@/components/ui/button"

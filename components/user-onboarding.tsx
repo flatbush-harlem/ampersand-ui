@@ -52,7 +52,7 @@ export default function UserOnboarding({ onComplete }: UserOnboardingProps) {
         <CardHeader>
           <CardTitle>Welcome to Phone Call Agent</CardTitle>
           <CardDescription>
-            Please provide your information to get started. This will help the agent assist you better.
+            Please provide your information to get started. The assistant may need this info to complete the task.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
