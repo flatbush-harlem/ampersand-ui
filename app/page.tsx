@@ -26,6 +26,7 @@ export default function PhoneCallAgent() {
   const [isCallActive, setIsCallActive] = useState(false)
   const [summary, setSummary] = useState("")
 const [ws, setWs] = useState<WebSocket | null>(null)
+const [callSid, setCallSid] = useState<string | null>(null);
 
   // User profile state
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
@@ -97,7 +98,7 @@ const [ws, setWs] = useState<WebSocket | null>(null)
         console.log("Call initiated:", result.callSid)
         setCallStatus("connected")
         setIsCallActive(true)
-
+        setCallSid(result.callSid)
         // Connect to the WebSocket stream
         const websocket = new WebSocket(`${process.env.NEXT_PUBLIC_WS_BASE_URL}/transcription-stream/${result.callSid}`)
       
@@ -139,7 +140,7 @@ const [ws, setWs] = useState<WebSocket | null>(null)
     
   }
 
-  const handleEndCall = (success = true) => {
+  const handleEndCall = async (success = true) => {
     setCallStatus("ended")
     setIsCallActive(false)
 
@@ -148,6 +149,24 @@ const [ws, setWs] = useState<WebSocket | null>(null)
       setWs(null)
     }
 
+    if (callSid) {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/end-call`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ callSid })
+        });
+  
+        const result = await response.json();
+        if (!result.success) {
+          console.error("Failed to end call:", result.error);
+        } else {
+          console.log(`Call ${callSid} ended`);
+        }
+      } catch (error) {
+        console.error("Error ending call:", error);
+      }
+    }
     if (success) {
       setSummary(`Call completed successfully. The task "${prompt}" was handled.`)
     } else {
