@@ -36,10 +36,6 @@ const [callSid, setCallSid] = useState<string | null>(null);
   // Add a new state variable to manage edit mode
   const [isEditing, setIsEditing] = useState(false);
 
-  // Function to toggle edit mode
-  const toggleEditMode = () => {
-    setIsEditing((prev) => !prev);
-  }
 
   // Check if user has completed onboarding
   useEffect(() => {
