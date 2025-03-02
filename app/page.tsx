@@ -19,7 +19,7 @@ interface UserProfile {
 
 export default function PhoneCallAgent() {
   const [prompt, setPrompt] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
+  const [toPhoneNumber, setToPhoneNumber] = useState("")
   const [callStatus, setCallStatus] = useState<"idle" | "ringing" | "connected" | "ended" | "failed">("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [transcript, setTranscript] = useState<Array<{ speaker: string; text: string }>>([])
@@ -31,6 +31,8 @@ const [callSid, setCallSid] = useState<string | null>(null);
   // User profile state
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [isFirstRun, setIsFirstRun] = useState(true)
+  const [userPhoneNumber, setUserPhoneNumber] = useState("")
+
 
   // Check if user has completed onboarding
   useEffect(() => {
@@ -40,14 +42,14 @@ const [callSid, setCallSid] = useState<string | null>(null);
       setUserProfile(profile)
       setIsFirstRun(false)
       // Pre-fill the phone number field with the user's number
-      setPhoneNumber(profile.phoneNumber)
+      setUserPhoneNumber(profile.phoneNumber)
     }
   }, [])
 
   // Save user profile to localStorage
   const handleOnboardingComplete = (profile: UserProfile) => {
     setUserProfile(profile)
-    setPhoneNumber(profile.phoneNumber)
+    setUserPhoneNumber(profile.phoneNumber)
     localStorage.setItem("userProfile", JSON.stringify(profile))
     setIsFirstRun(false)
   }
@@ -73,7 +75,7 @@ const [callSid, setCallSid] = useState<string | null>(null);
       return
     }
 
-    if (!validatePhoneNumber(phoneNumber)) {
+    if (!validatePhoneNumber(toPhoneNumber)) {
       setErrorMessage("Please enter a valid phone number.")
       return
     }
@@ -86,7 +88,7 @@ const [callSid, setCallSid] = useState<string | null>(null);
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          number: phoneNumber,
+          number: toPhoneNumber,
           prompt: prompt,
           first_message: "Hey can you hear me?..." // Customize this as needed
         })
@@ -230,8 +232,8 @@ const [callSid, setCallSid] = useState<string | null>(null);
               <Input
                 id="phone"
                 placeholder="+1 (555) 123-4567"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                value={toPhoneNumber}
+                onChange={(e) => setToPhoneNumber(e.target.value)}
               />
             </div>
 
