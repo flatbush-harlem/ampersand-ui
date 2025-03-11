@@ -20,7 +20,7 @@ interface UserProfile {
 }
 
 export default function PhoneCallAgent() {
-  const [prompt, setPrompt] = useState("You are an outbound agent, when you get conneted with the caller and here a voice your job is to execute a task that will be given to you. This task will require you to have a conversation with someone who needs to realize quickly that you are an AI assistant and you need to be brief in your repsonses to give time for the person to abruptly step in. Your task is:")
+  const [task, setTask] = useState("")
   const [toPhoneNumber, setToPhoneNumber] = useState("")
   const [callStatus, setCallStatus] = useState<"idle" | "ringing" | "connected" | "ended" | "failed">("idle")
   const [errorMessage, setErrorMessage] = useState("")
@@ -29,7 +29,8 @@ export default function PhoneCallAgent() {
   const [summary, setSummary] = useState("")
  const [ws, setWs] = useState<WebSocket | null>(null)
 const [callSid, setCallSid] = useState<string | null>(null);
-
+//TODO: Modify the system rpompt to be an .env variable
+const systemPrompt = "You are an outbound agent, when you get connected with the caller and hear a voice your job is to execute a task that will be given to you. Your task is:";
   // User profile state
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [isFirstRun, setIsFirstRun] = useState(true)
@@ -38,6 +39,7 @@ const [callSid, setCallSid] = useState<string | null>(null);
   // Add a new state variable to manage edit mode
   const [isEditing, setIsEditing] = useState(false);
 
+  const [company, setCompany] = useState(""); // New state variable for company name
 
   // Check if user has completed onboarding
   useEffect(() => {
@@ -76,13 +78,18 @@ const [callSid, setCallSid] = useState<string | null>(null);
     setSummary("")
 
     // Validate inputs
-    if (!validatePrompt(prompt)) {
-      setErrorMessage("Prompt is invalid — please check for formatting issues.")
+    if (!validatePrompt(task)) {
+      setErrorMessage("Task is invalid — please check for formatting issues.")
       return
     }
 
     if (!validatePhoneNumber(toPhoneNumber)) {
       setErrorMessage("Please enter a valid phone number.")
+      return
+    }
+
+    if (!company.trim()) { // Validate company name
+      setErrorMessage("Please enter a valid company name.")
       return
     }
 
@@ -95,8 +102,8 @@ const [callSid, setCallSid] = useState<string | null>(null);
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           number: toPhoneNumber,
-          prompt: prompt,
-          first_message: "Hey can you hear me?..." // Customize this as needed
+          prompt: `${systemPrompt} ${task}`,
+          first_message: `Hey is this ${company}?` // Use the company name
         })
       })
 
@@ -187,7 +194,7 @@ const [callSid, setCallSid] = useState<string | null>(null);
     setCallStatus("idle")
     setTranscript([])
     setSummary("")
-    setPrompt("")
+    setTask("")
     // Don't reset the phone number as we want to keep the user's number
   }
 
@@ -225,8 +232,6 @@ const [callSid, setCallSid] = useState<string | null>(null);
         </Card>
       )}
 
-
-
       {!isCallActive && callStatus !== "ended" && callStatus !== "failed" ? (
         <Card>
           <CardHeader>
@@ -235,12 +240,22 @@ const [callSid, setCallSid] = useState<string | null>(null);
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="company">Company Name</Label>
+              <Input
+                id="company"
+                placeholder="Enter the company you want to call (e.g., Matt's Pizza)"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="prompt">Enter Task (Prompt)</Label>
               <Textarea
                 id="prompt"
-                placeholder="What should the agent do? (e.g., Confirm appointment)"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="What should the agent do? (e.g., Place a pickup order for 2 large pizzas with pepperoni)"
+                value={task}
+                onChange={(e) => setTask(e.target.value)}
               />
             </div>
 
