@@ -202,7 +202,10 @@ const systemPrompt = "You are an outbound agent, when you get connected with the
   if (isFirstRun || isEditing) {
     return (
       <div>
-        <UserOnboarding onComplete={handleOnboardingComplete} isEditing={isEditing} />
+        <UserOnboarding 
+          onComplete={handleOnboardingComplete} 
+          isEditing={isFirstRun || isEditing} // Set to true for first run or editing
+        />
       </div>
     );
   }
@@ -240,7 +243,7 @@ const systemPrompt = "You are an outbound agent, when you get connected with the
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="company">Company Name</Label>
+              <Label htmlFor="company">Business Name</Label>
               <Input
                 id="company"
                 placeholder="Enter the company you want to call (e.g., Matt's Pizza)"
