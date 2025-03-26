@@ -51,9 +51,19 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete, isEditing }
     <div className="container max-w-md mx-auto py-16 px-4">
       <Card>
         <CardHeader>
-          <CardTitle>Welcome to Phone Call Agent</CardTitle>
+          <CardTitle>Let's get started with Phone Call Agent</CardTitle>
           <CardDescription>
-            Please provide your information to get started. The assistant may need this info to complete the task.
+            <div className="space-y-4">
+              <p className="text-base font-medium">
+                To get started, we need some basic information from you so the AI can complete the task on your behalf.
+              </p>
+              
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <strong>Note:</strong> This phone number will only be shared with businesses if there are issues during calls. The AI uses a different number for making calls.
+                </p>
+              </div>
+            </div>
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -78,7 +88,7 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete, isEditing }
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 disabled={!isEditing}
               />
-              <p className="text-xs text-muted-foreground">This will be used as your default number for calls</p>
+              <p className="text-xs text-muted-foreground">This will not be the phone number used for the call. The AI will use a different number for making calls.</p>
             </div>
 
             {error && (
