@@ -51,7 +51,7 @@ const UserOnboarding: React.FC<UserOnboardingProps> = ({ onComplete, isEditing }
     <div className="container max-w-md mx-auto py-16 px-4">
       <Card>
         <CardHeader>
-          <CardTitle>Let's get started with Phone Call Agent</CardTitle>
+          <CardTitle>Get started with Phone Call Agent</CardTitle>
           <CardDescription>
             <div className="space-y-4">
               <p className="text-base font-medium">
